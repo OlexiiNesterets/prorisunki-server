@@ -1,15 +1,72 @@
 
 const express = require('express');
+const bodyParser = require("body-parser");
+const fs = require("fs").promises;
+
 const app = express();
+
+//делаем наш парсинг в формате json
+app.use(bodyParser.json());
+    
+// парсит запросы по типу: application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
+
 const port = 5000;
 
+let users = {};
+
+const myData = {
+    someName: 'koko',
+    num: 1305,
+};
+
+const TIMEOUT = 1000 * 30;
+let timerId;
+
 app.get('/', (req, res) => {
-    res.status(200).json({
-        someName: 'koko',
-        num: 1305,
-    });
+    res.status(200).json(users);
+});
+
+app.post('/', async (req, res) => {
+    
+    clearTimeout(timerId);
+
+    if (users[req.body.name]) {
+        timerId = setTimeout(() => {
+            fs.writeFile('db.json', Buffer.from(''));
+            users = {};
+        }, TIMEOUT);
+        return res.status(200).send(users);
+    }
+
+    users[req.body.name] = Date.now();
+
+    const dbData = await getDataFromFile('db.json');
+
+    await writeToFile('db.json', JSON.stringify({...dbData, ...users}));
+
+    timerId = setTimeout(() => {
+        fs.writeFile('db.json', Buffer.from(''));
+        users = {};
+    }, TIMEOUT);
+
+    res.status(200).send(users);
 });
 
 app.listen(port, () => {
     console.log(`Now listening on port ${port}`); 
 });
+
+async function getDataFromFile(path) {
+    const data = await fs.readFile(path);
+    
+    if (!data.length) {
+        return [];
+    }
+
+    return JSON.parse(data);
+}
+
+async function writeToFile(path, content, error) {
+    await fs.writeFile(path, content, error);
+}
