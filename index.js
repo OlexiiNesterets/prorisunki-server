@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require("body-parser");
 const cors = require('cors');
 const fs = require("fs").promises;
+const { join } = require('path');
 
 const app = express();
 
@@ -29,7 +30,7 @@ const TIMEOUT = 1000 * 30;
 let timerId;
 
 app.get('/', async (req, res) => {
-    const dbData = await getDataFromFile('db.json');
+    const dbData = await getDataFromFile(join(__dirname, 'db.json'));
     res.status(200).json(dbData);
 });
 
@@ -41,7 +42,7 @@ app.post('/', async (req, res) => {
 
     if (users[req.body.name]) {
         timerId = setTimeout(() => {
-            fs.writeFile('db.json', Buffer.from(''));
+            fs.writeFile(join(__dirname, 'db.json'), Buffer.from(''));
             users = {};
         }, TIMEOUT);
         return res.status(200).send(users);
@@ -49,16 +50,16 @@ app.post('/', async (req, res) => {
 
     users[req.body.name] = Date.now();
 
-    const dbData = await getDataFromFile('db.json');
+    const dbData = await getDataFromFile(join(__dirname, 'db.json'));
 
     console.log('log 2');
 
-    await writeToFile('db.json', JSON.stringify({...dbData, ...users}));
+    await writeToFile(join(__dirname, 'db.json'), JSON.stringify({...dbData, ...users}));
 
     console.log('log 3');
 
     timerId = setTimeout(() => {
-        fs.writeFile('db.json', Buffer.from(''));
+        fs.writeFile(join(__dirname, 'db.json'), Buffer.from(''));
         users = {};
     }, TIMEOUT);
 
