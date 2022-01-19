@@ -34,31 +34,28 @@ app.get('/', (req, res) => {
 
 app.post('/', async (req, res) => {
 
+    clearTimeout(timerId);
+
+    if (users[req.body.name]) {
+        timerId = setTimeout(() => {
+            fs.writeFile('db.json', Buffer.from(''));
+            users = {};
+        }, TIMEOUT);
+        return res.status(200).send(users);
+    }
+
+    users[req.body.name] = Date.now();
+
+    const dbData = await getDataFromFile('db.json');
+
+    await writeToFile('db.json', JSON.stringify({...dbData, ...users}));
+
+    timerId = setTimeout(() => {
+        fs.writeFile('db.json', Buffer.from(''));
+        users = {};
+    }, TIMEOUT);
+
     res.status(200).send(users);
-
-    
-    // clearTimeout(timerId);
-
-    // if (users[req.body.name]) {
-    //     timerId = setTimeout(() => {
-    //         fs.writeFile('db.json', Buffer.from(''));
-    //         users = {};
-    //     }, TIMEOUT);
-    //     return res.status(200).send(users);
-    // }
-
-    // users[req.body.name] = Date.now();
-
-    // const dbData = await getDataFromFile('db.json');
-
-    // await writeToFile('db.json', JSON.stringify({...dbData, ...users}));
-
-    // timerId = setTimeout(() => {
-    //     fs.writeFile('db.json', Buffer.from(''));
-    //     users = {};
-    // }, TIMEOUT);
-
-    // res.status(200).send(users);
 });
 
 app.listen(port, () => {
