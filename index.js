@@ -1,6 +1,7 @@
 
 const express = require('express');
 const bodyParser = require("body-parser");
+const cors = require('cors');
 const fs = require("fs").promises;
 
 const app = express();
@@ -10,6 +11,10 @@ app.use(bodyParser.json());
     
 // парсит запросы по типу: application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cors({
+    origin: '*'
+}));
 
 const port = 5000;
 
