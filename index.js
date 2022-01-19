@@ -36,6 +36,8 @@ app.post('/', async (req, res) => {
 
     clearTimeout(timerId);
 
+    console.log('log 1');
+
     if (users[req.body.name]) {
         timerId = setTimeout(() => {
             fs.writeFile('db.json', Buffer.from(''));
@@ -48,7 +50,11 @@ app.post('/', async (req, res) => {
 
     const dbData = await getDataFromFile('db.json');
 
+    console.log('log 2');
+
     await writeToFile('db.json', JSON.stringify({...dbData, ...users}));
+
+    console.log('log 3');
 
     timerId = setTimeout(() => {
         fs.writeFile('db.json', Buffer.from(''));
