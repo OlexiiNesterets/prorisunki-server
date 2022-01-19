@@ -29,7 +29,8 @@ const TIMEOUT = 1000 * 30;
 let timerId;
 
 app.get('/', (req, res) => {
-    res.status(200).json(users);
+    const dbData = await getDataFromFile('db.json');
+    res.status(200).json(dbData);
 });
 
 app.post('/', async (req, res) => {
