@@ -31,13 +31,13 @@ let timerId;
 
 app.get('/', async (req, res) => {
     // const dbData = await getDataFromFile(join(__dirname, 'db.json'));
-    res.writeHead(200, {
-        'Content-Type': 'text/event-stream; charset=utf-8',
-        'Cache-Control': 'no-cache'
-    });
+    // res.writeHead(200, {
+    //     'Content-Type': 'text/event-stream; charset=utf-8',
+    //     'Cache-Control': 'no-cache'
+    // });
 
-    res.flushHeaders();
-    console.log('REQUEST!!');
+    // res.flushHeaders();
+    // console.log('REQUEST!!');
     // setInterval(() => {
         // res.write(`data: ${JSON.stringify(users)}\n\n`);
         // res.status(200).json(users);
@@ -45,9 +45,9 @@ app.get('/', async (req, res) => {
     // res.write('event: message\n"');
 
     // res.write(`data: ${JSON.stringify({abc: 66})}\n\n`);
-    write(res);
+    // write(res);
 
-    // res.status(200).json(users);
+    res.status(200).json(users);
 });
 
 app.post('/', async (req, res) => {
