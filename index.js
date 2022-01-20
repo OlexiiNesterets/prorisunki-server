@@ -38,10 +38,10 @@ app.get('/', async (req, res) => {
 
     res.flushHeaders();
     console.log('REQUEST!!');
-    setInterval(() => {
-        res.write(`data: ${JSON.stringify(users)}\n\n`);
+    // setInterval(() => {
+        // res.write(`data: ${JSON.stringify(users)}\n\n`);
         // res.status(200).json(users);
-    }, 1000);
+    // }, 1000);
     // res.write('event: message\n"');
 
     // res.write(`data: ${JSON.stringify({abc: 66})}\n\n`);
