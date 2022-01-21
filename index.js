@@ -31,23 +31,23 @@ let timerId;
 
 app.get('/', async (req, res) => {
     // const dbData = await getDataFromFile(join(__dirname, 'db.json'));
-    // res.writeHead(200, {
-    //     'Content-Type': 'text/event-stream; charset=utf-8',
-    //     'Cache-Control': 'no-cache'
-    // });
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache'
+    });
 
-    // res.flushHeaders();
+    res.flushHeaders();
     // console.log('REQUEST!!');
-    // setInterval(() => {
-        // res.write(`data: ${JSON.stringify(users)}\n\n`);
+    setInterval(() => {
+        res.write(`data: ${JSON.stringify(users)}\n\n`);
         // res.status(200).json(users);
-    // }, 1000);
+    }, 1000);
     // res.write('event: message\n"');
 
     // res.write(`data: ${JSON.stringify({abc: 66})}\n\n`);
-    // write(res);
+    write(res);
 
-    res.status(200).json(users);
+    res.write(`data: ${JSON.stringify(users)}\n\n`);
 });
 
 app.get('/flow', async (req, res) => {
@@ -71,11 +71,11 @@ app.get('/flow', async (req, res) => {
 
 app.post('/', async (req, res) => {
 
-    // res.writeHead(200, {
-    //     'Content-Type': 'text/event-stream; charset=utf-8',
-    //     'Cache-Control': 'no-cache'
-    // });
-    // res.flushHeaders();
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache'
+    });
+    res.flushHeaders();
 
     users[req.body.name] = Date.now();
 
@@ -83,10 +83,10 @@ app.post('/', async (req, res) => {
     //     res.write(`data: ${JSON.stringify(users)}\n\n`);
     // }, 1000);
 
-    // res.write(`data: ${JSON.stringify(users)}\n\n`);
+    res.write(`data: ${JSON.stringify(users)}\n\n`);
     // write(res);
 
-    res.status(200).json(users);
+    // res.status(200).json(users);
 });
 
 app.listen(port, () => {
