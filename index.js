@@ -51,17 +51,15 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/flow', async (req, res) => {
-    // const dbData = await getDataFromFile(join(__dirname, 'db.json'));
+
     res.writeHead(200, {
         'Content-Type': 'text/event-stream; charset=utf-8',
         'Cache-Control': 'no-cache'
     });
 
     res.flushHeaders();
-    // console.log('REQUEST!!');
     setInterval(() => {
         res.write(`data: ${JSON.stringify(users)}\n\n`);
-        // res.status(200).json(users);
     }, 1000);
     // res.write('event: message\n"');
 
@@ -73,13 +71,12 @@ app.get('/flow', async (req, res) => {
 
 app.post('/', async (req, res) => {
 
-    res.writeHead(200, {
-        'Content-Type': 'text/event-stream; charset=utf-8',
-        'Cache-Control': 'no-cache'
-    });
-    res.flushHeaders();
-    console.log('REQUEST!!');
-    // res.write(`data: {fromPost: "yeah!"}`);
+    // res.writeHead(200, {
+    //     'Content-Type': 'text/event-stream; charset=utf-8',
+    //     'Cache-Control': 'no-cache'
+    // });
+    // res.flushHeaders();
+
     users[req.body.name] = Date.now();
 
     // setInterval(() => {
@@ -87,7 +84,9 @@ app.post('/', async (req, res) => {
     // }, 1000);
 
     // res.write(`data: ${JSON.stringify(users)}\n\n`);
-    write(res);
+    // write(res);
+
+    res.status(200).json(users);
 });
 
 app.listen(port, () => {
