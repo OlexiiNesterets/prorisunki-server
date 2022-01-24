@@ -10,11 +10,13 @@ const wss = new WebSocket.Server({ server: server });
 
 const clientsMap = new Map();
 
+let connections = 0;
+
 const getValues = (map) => () => Array.from(map.values());
 
 const getClientMapValues = getValues(clientsMap);
 
-const TIMER = 30 * 1000;
+const TIMER = 20 * 1000;
 
 let timerId;
 
@@ -28,6 +30,7 @@ function clearClientsList(wss) {
     wss.clients.forEach(function each(client) {
         if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify(getClientMapValues()));
+            client.send(JSON.stringify({connections}));
         }
     });
     console.log('CLEARED_BY_TIMEOUT ');
@@ -36,6 +39,7 @@ function clearClientsList(wss) {
 wss.on('connection', function connection(ws, req) {
     console.log('A new client Connected!');
     ws.send('Welcome New Client!');
+    connections++;
 
     ws.on('message', function incoming(message) {
         timerId = resetTimer(() => clearClientsList(wss));
@@ -45,6 +49,12 @@ wss.on('connection', function connection(ws, req) {
         wss.clients.forEach(function each(client) {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(JSON.stringify(getClientMapValues()));
+                client.send(JSON.stringify({connections}));
+                if (connections === clientsMap.size) {
+                    client.send('START!');
+                    const sortedValues = getClientMapValues().slice().sort((a, b) => a.time - b.time);
+                    client.send(JSON.stringify(sortedValues));
+                }
             }
         });
         console.log(getClientMapValues());
@@ -53,12 +63,15 @@ wss.on('connection', function connection(ws, req) {
     ws.on('close', function closing() {
         timerId = resetTimer(() => clearClientsList(wss));
         clientsMap.delete(ws);
+        connections--;
         wss.clients.forEach(function each(client) {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(JSON.stringify(getClientMapValues()));
+                client.send(JSON.stringify({connections}));
             }
         });
         console.log(getClientMapValues());
+
     });
 });
 
