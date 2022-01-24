@@ -10,9 +10,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sinclair/typebox": "^0.23.3",
+    "ajv": "^8.9.0",
     "body-parser": "^1.19.1",
     "cors": "^2.8.5",
     "express": "^4.17.2",
-    "mysql": "^2.18.1"
+    "express-formidable": "^1.2.0",
+    "multiparty": "^4.2.3",
+    "mysql": "^2.18.1",
+    "shallow-equal": "^1.2.1",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v19.3.0",
+    "ws": "^8.4.2",
+    "wsapix": "^0.5.0"
   }
 }

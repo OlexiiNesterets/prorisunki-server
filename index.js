@@ -1,98 +1,67 @@
 
-const express = require('express');
-const bodyParser = require("body-parser");
-const cors = require('cors');
-const fs = require("fs").promises;
-const { join } = require('path');
-
-const app = express();
-
-//делаем наш парсинг в формате json
-app.use(bodyParser.json());
-
-// парсит запросы по типу: application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
-
-app.use(cors({
-    origin: '*'
-}));
+const express = require('express')
+const app = express()
+const server = require('http').createServer(app);
+const WebSocket = require('ws');
 
 const port = process.env.PORT || 5000;
 
-let users = {};
+const wss = new WebSocket.Server({ server: server });
 
-const myData = {
-    someName: 'koko',
-    num: 1305,
-};
+const clientsMap = new Map();
 
-const TIMEOUT = 1000 * 30;
+const getValues = (map) => () => Array.from(map.values());
+
+const getClientMapValues = getValues(clientsMap);
+
+const TIMER = 30 * 1000;
+
 let timerId;
 
-app.get('/', async (req, res) => {
-    // const dbData = await getDataFromFile(join(__dirname, 'db.json'));
-    res.writeHead(200, {
-        'Content-Type': 'text/event-stream; charset=utf-8',
-        'Cache-Control': 'no-cache'
-    });
-
-    res.flushHeaders();
-    // console.log('REQUEST!!');
-    setInterval(() => {
-        res.write(`data: ${JSON.stringify(users)}\n\n`);
-        // res.status(200).json(users);
-    }, 1000);
-    // res.write('event: message\n"');
-
-    // res.write(`data: ${JSON.stringify({abc: 66})}\n\n`);
-    write(res);
-
-    res.write(`data: ${JSON.stringify(users)}\n\n`);
-});
-
-app.get('/flow', async (req, res) => {
-
-    res.writeHead(200, {
-        'Content-Type': 'text/event-stream; charset=utf-8',
-        'Cache-Control': 'no-cache'
-    });
-
-    res.flushHeaders();
-    setInterval(() => {
-        res.write(`data: ${JSON.stringify(users)}\n\n`);
-    }, 1000);
-    // res.write('event: message\n"');
-
-    // res.write(`data: ${JSON.stringify({abc: 66})}\n\n`);
-    write(res);
-
-});
-
-
-app.post('/', async (req, res) => {
-
-    res.writeHead(200, {
-        'Content-Type': 'text/event-stream; charset=utf-8',
-        'Cache-Control': 'no-cache'
-    });
-    res.flushHeaders();
-
-    users[req.body.name] = Date.now();
-
-    // setInterval(() => {
-    //     res.write(`data: ${JSON.stringify(users)}\n\n`);
-    // }, 1000);
-
-    res.write(`data: ${JSON.stringify(users)}\n\n`);
-    // write(res);
-
-    // res.status(200).json(users);
-});
-
-app.listen(port, () => {
-    console.log(`Now listening on port ${port}`);
-});
-
-function write(res) {
-    res.write(`event: message\ndata: ${JSON.stringify(users)}\n\n`);
+function resetTimer(callback) {
+    clearTimeout(timerId);
+    return setTimeout(callback, TIMER);
 }
+
+function clearClientsList(wss) {
+    clientsMap.clear();
+    wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(getClientMapValues()));
+        }
+    });
+    console.log('CLEARED_BY_TIMEOUT ');
+}
+
+wss.on('connection', function connection(ws, req) {
+    console.log('A new client Connected!');
+    ws.send('Welcome New Client!');
+
+    ws.on('message', function incoming(message) {
+        timerId = resetTimer(() => clearClientsList(wss));
+        const newUser = JSON.parse(message);
+        console.log('NEW_USER:', newUser);
+        clientsMap.set(ws, newUser);
+        wss.clients.forEach(function each(client) {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(getClientMapValues()));
+            }
+        });
+        console.log(getClientMapValues());
+    });
+
+    ws.on('close', function closing() {
+        timerId = resetTimer(() => clearClientsList(wss));
+        clientsMap.delete(ws);
+        wss.clients.forEach(function each(client) {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(getClientMapValues()));
+            }
+        });
+        console.log(getClientMapValues());
+    });
+});
+
+app.get('/', (req, res) => res.send('Hello World!'));
+
+server.listen(port, () => console.log(`Lisening on port :${port}`));
