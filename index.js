@@ -8,73 +8,46 @@ const port = process.env.PORT || 5000;
 
 const wss = new WebSocket.Server({ server: server });
 
-const clientsMap = new Map();
-
-let connections = 0;
+let clientsMap = new Map();
 
 const getValues = (map) => () => Array.from(map.values());
 
-const getClientMapValues = getValues(clientsMap);
+const getClientsMapValues = getValues(clientsMap);
 
-const TIMER = 20 * 1000;
+function Timer(ms, onTimeout) {
+    let timerId;
 
-let timerId;
+    this.restartTimer = () => {
+        clearTimeout(timerId);
+        timerId = setTimeout(onTimeout, ms);
+    };
 
-function resetTimer(callback) {
-    clearTimeout(timerId);
-    return setTimeout(callback, TIMER);
+    this.stop = () => clearTimeout(timerId);
 }
 
-function clearClientsList(wss) {
+const timer = new Timer(20 * 1000, () => {
     clientsMap.clear();
-    wss.clients.forEach(function each(client) {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(getClientMapValues()));
-            client.send(JSON.stringify({connections}));
-        }
-    });
-    console.log('CLEARED_BY_TIMEOUT ');
-}
+    console.log('CLEARED_BY_TIMEOUT');
+});
+
 
 wss.on('connection', function connection(ws, req) {
-    console.log('A new client Connected!');
-    ws.send('Welcome New Client!');
-    connections++;
-
+    timer.restartTimer();
     ws.on('message', function incoming(message) {
-        timerId = resetTimer(() => clearClientsList(wss));
-        const newUser = JSON.parse(message);
-        console.log('NEW_USER:', newUser);
-        clientsMap.set(ws, newUser);
+        const userInfo = JSON.parse(message);
+        clientsMap.set(ws, userInfo);
+        console.log('clientsMap.size', clientsMap.size);
         wss.clients.forEach(function each(client) {
             if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify(getClientMapValues()));
-                client.send(JSON.stringify({connections}));
-                if (connections === clientsMap.size) {
-                    client.send('START!');
-                    const sortedValues = getClientMapValues().slice().sort((a, b) => a.time - b.time);
-                    client.send(JSON.stringify(sortedValues));
-                }
+                client.send(JSON.stringify(getClientsMapValues()));
             }
         });
-        console.log(getClientMapValues());
     });
 
     ws.on('close', function closing() {
-        timerId = resetTimer(() => clearClientsList(wss));
+        timer.restartTimer();
         clientsMap.delete(ws);
-        connections--;
-        wss.clients.forEach(function each(client) {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify(getClientMapValues()));
-                client.send(JSON.stringify({connections}));
-            }
-        });
-        console.log(getClientMapValues());
-
     });
 });
-
-app.get('/', (req, res) => res.send('Hello World!'));
 
 server.listen(port, () => console.log(`Lisening on port :${port}`));

@@ -18,6 +18,7 @@
     "express-formidable": "^1.2.0",
     "multiparty": "^4.2.3",
     "mysql": "^2.18.1",
+    "nanoid": "^3.2.0",
     "shallow-equal": "^1.2.1",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v19.3.0",
     "ws": "^8.4.2",
