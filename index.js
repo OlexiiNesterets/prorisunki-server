@@ -14,6 +14,11 @@ const getValues = (map) => () => Array.from(map.values());
 
 const getClientsMapValues = getValues(clientsMap);
 
+const getSortedClientsValues = () =>
+    getClientsMapValues()
+        .slice()
+        .sort((a, b) => new Date(a.time) - new Date(b.time));
+
 function Timer(ms, onTimeout) {
     let timerId;
 
@@ -39,7 +44,7 @@ wss.on('connection', function connection(ws, req) {
         console.log('clientsMap.size', clientsMap.size);
         wss.clients.forEach(function each(client) {
             if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify(getClientsMapValues()));
+                client.send(JSON.stringify(getSortedClientsValues()));
             }
         });
     });
