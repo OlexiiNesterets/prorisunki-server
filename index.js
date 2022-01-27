@@ -33,13 +33,24 @@ function Timer(ms, onTimeout) {
 const timer = new Timer(20 * 1000, () => {
     clientsMap.clear();
     console.log('CLEARED_BY_TIMEOUT');
+    console.log('clientsMap.size', clientsMap.size);
+
 });
 
 
 wss.on('connection', function connection(ws, req) {
     timer.restartTimer();
+    
     ws.on('message', function incoming(message) {
+
+        if (JSON.parse(message).ping) {
+            console.log('in ping');
+            return;
+        }
+
+        timer.restartTimer();
         const userInfo = JSON.parse(message);
+
         clientsMap.set(ws, userInfo);
         console.log('clientsMap.size', clientsMap.size);
         wss.clients.forEach(function each(client) {
@@ -52,6 +63,7 @@ wss.on('connection', function connection(ws, req) {
     ws.on('close', function closing() {
         timer.restartTimer();
         clientsMap.delete(ws);
+        console.log('clientsMap.size', clientsMap.size);
     });
 });
 
