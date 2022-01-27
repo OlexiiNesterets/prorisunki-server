@@ -1,6 +1,6 @@
 
-const express = require('express')
-const app = express()
+const express = require('express');
+const app = express();
 const server = require('http').createServer(app);
 const WebSocket = require('ws');
 
@@ -40,11 +40,10 @@ const timer = new Timer(20 * 1000, () => {
 
 wss.on('connection', function connection(ws, req) {
     timer.restartTimer();
-    
+
     ws.on('message', function incoming(message) {
 
         if (JSON.parse(message).ping) {
-            console.log('in ping');
             return;
         }
 
