@@ -42,6 +42,7 @@ wss.on('connection', function connection(ws, req) {
     timer.restartTimer();
 
     ws.on('message', function incoming(message) {
+        const serverTime = new Date();
 
         if (JSON.parse(message).ping) {
             return;
@@ -50,7 +51,8 @@ wss.on('connection', function connection(ws, req) {
         timer.restartTimer();
         const userInfo = JSON.parse(message);
 
-        clientsMap.set(ws, userInfo);
+        clientsMap.set(ws, {...userInfo, time: serverTime});
+        // clientsMap.set(ws, userInfo);
         console.log('clientsMap.size', clientsMap.size);
         wss.clients.forEach(function each(client) {
             if (client.readyState === WebSocket.OPEN) {
